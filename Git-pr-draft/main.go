@@ -57,14 +57,14 @@ Notas:
 
 	flag.Parse()
 
-	if *titulo == "" {
-		fmt.Println("❌ Debes proporcionar --titulo")
-		os.Exit(1)
+	if *branchName == "" {
+		fmt.Print("Introduce el nombre de la rama: ")
+		fmt.Scanln(branchName)
 	}
 
-	if *branchName == "" {
-		fmt.Println("❌ Debes proporcionar --branch")
-		os.Exit(1)
+	if *titulo == "" {
+		fmt.Print("Introduce el título del Pull Request: ")
+		fmt.Scanln(titulo)
 	}
 
 	// Config personal
