@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"fmt"
@@ -27,6 +28,12 @@ func getGitConfig(key string) string {
 		os.Exit(1)
 	}
 	return strings.TrimSpace(string(out))
+}
+
+func scan() string {
+	reader := bufio.NewReader(os.Stdin)
+	nombre, _ := reader.ReadString('\n')
+	return strings.TrimSpace(nombre)
 }
 
 func main() {
@@ -64,7 +71,12 @@ Notas:
 
 	if *titulo == "" {
 		fmt.Print("Introduce el título del Pull Request: ")
-		fmt.Scanln(titulo)
+		tituloInput := scan()
+		if tituloInput == "" {
+			fmt.Println("❌ Debes proporcionar un título para el Pull Request")
+			os.Exit(1)
+		}
+		*titulo = tituloInput
 	}
 
 	// Config personal
