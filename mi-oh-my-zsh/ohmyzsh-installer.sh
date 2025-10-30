@@ -98,20 +98,67 @@ install_ohmyzsh() {
     fi
     
     log "Descargando e instalando Oh My Zsh..."
+    log "Directorio de destino: $OH_MY_ZSH_DIR"
     
     # Crear backup del .zshrc existente
     create_backup "$ZSHRC"
     
-    # Instalar Oh My Zsh sin cambiar shell automáticamente
+    # Forzar variables de entorno para el instalador oficial
+    export ZSH="$OH_MY_ZSH_DIR"
     export RUNZSH=no
     export KEEP_ZSHRC=yes
+    export CHSH=no
     
-    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || {
-        error "Falló la instalación de Oh My Zsh"
-        exit 1
-    }
-    
-    log "Oh My Zsh instalado correctamente"
+    # Descargar y ejecutar el instalador oficial
+    log "Ejecutando instalador oficial de Oh My Zsh..."
+    if sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended; then
+        log "Oh My Zsh instalado correctamente"
+        
+        # Configurar tema fino
+        log "Configurando tema fino..."
+        if [ -f "$ZSHRC" ] && grep -q "^ZSH_THEME=" "$ZSHRC"; then
+            sed -i.bak "s|^ZSH_THEME=.*|ZSH_THEME=\"fino\"|" "$ZSHRC"
+            rm -f "$ZSHRC.bak"
+        fi
+    else
+        warn "El instalador oficial falló. Intentando instalación manual..."
+        
+        # Fallback: instalación manual
+        log "Clonando repositorio de Oh My Zsh..."
+        if ! git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$OH_MY_ZSH_DIR"; then
+            error "Falló la clonación del repositorio de Oh My Zsh"
+            error "Verifica que tienes permisos en: $OH_MY_ZSH_DIR"
+            exit 1
+        fi
+        
+        # Crear directorios custom
+        mkdir -p "$OH_MY_ZSH_DIR/custom/plugins"
+        mkdir -p "$OH_MY_ZSH_DIR/custom/themes"
+        
+        # Si no existe .zshrc, crear uno básico desde la plantilla
+        if [ ! -f "$ZSHRC" ]; then
+            log "Creando .zshrc desde plantilla..."
+            cp "$OH_MY_ZSH_DIR/templates/zshrc.zsh-template" "$ZSHRC"
+            # Actualizar la ruta de ZSH en el .zshrc
+            sed -i.bak "s|export ZSH=.*|export ZSH=\"$OH_MY_ZSH_DIR\"|" "$ZSHRC"
+            # Configurar tema fino
+            sed -i.bak "s|ZSH_THEME=.*|ZSH_THEME=\"fino\"|" "$ZSHRC"
+            rm -f "$ZSHRC.bak"
+        else
+            log "Configurando tema fino..."
+            # Si el .zshrc existe, actualizar el tema
+            if grep -q "^ZSH_THEME=" "$ZSHRC"; then
+                sed -i.bak "s|^ZSH_THEME=.*|ZSH_THEME=\"fino\"|" "$ZSHRC"
+                rm -f "$ZSHRC.bak"
+            else
+                # Si no existe la línea del tema, agregarla después de la línea de ZSH
+                sed -i.bak "/^export ZSH=/a ZSH_THEME=\"fino\"" "$ZSHRC"
+                rm -f "$ZSHRC.bak"
+            fi
+        fi
+        
+        log "Oh My Zsh instalado correctamente (instalación manual)"
+    fi
 }
 
 # Función para instalar plugin externo
@@ -212,11 +259,17 @@ configure_plugins() {
         # Crear un archivo temporal con la nueva configuración
         awk -v new_plugins="$formatted_plugins" '
         /^plugins=\(/ {
+            in_plugins = 1
             print "plugins=("
             print new_plugins
-            # Saltar hasta el cierre del array
-            while (getline && !/^\)/) {}
             print ")"
+            next
+        }
+        in_plugins && /^\)/ {
+            in_plugins = 0
+            next
+        }
+        in_plugins {
             next
         }
         { print }
@@ -361,6 +414,13 @@ main() {
             if [ -z "$2" ]; then
                 error "Especifica la lista de plugins: $0 --plugins 'git,docker,z'"
                 exit 1
+            fi
+            # Verificar si Oh My Zsh está instalado, si no, instalarlo
+            if [ ! -d "$OH_MY_ZSH_DIR" ]; then
+                warn "Oh My Zsh no está instalado. Instalando..."
+                check_dependencies
+                install_ohmyzsh
+                install_external_plugins
             fi
             configure_plugins "$2"
             validate_zshrc

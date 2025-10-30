@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Quick Setup Script
 # Configuración rápida de los scripts para uso inmediato
 
@@ -7,10 +7,17 @@ echo
 
 # Hacer ejecutables los scripts
 echo "Haciendo ejecutables los scripts..."
-chmod +x ohmyzsh-installer.sh
-chmod +x plugin-manager.sh
+chmod +x ohmyzsh-installer.sh 2>/dev/null || echo "⚠ No se pudieron cambiar permisos de ohmyzsh-installer.sh (se puede ignorar en Windows)"
+chmod +x plugin-manager.sh 2>/dev/null || echo "⚠ No se pudieron cambiar permisos de plugin-manager.sh (se puede ignorar en Windows)"
 
 echo "✓ Scripts configurados"
+echo
+
+# Si se pasaron argumentos, ejecutar directamente el plugin-manager
+if [ $# -gt 0 ]; then
+    exec ./plugin-manager.sh "$@"
+fi
+
 echo
 
 # Mostrar opciones disponibles
@@ -41,7 +48,14 @@ echo "   ./plugin-manager.sh --profiles"
 echo
 
 # Preguntar qué hacer
-read -p "¿Qué deseas hacer? (1-4, o 'q' para salir): " choice
+# Compatible con bash y zsh
+if [ -n "$BASH_VERSION" ]; then
+    read -p "¿Qué deseas hacer? (1-4, o 'q' para salir): " choice
+else
+    # Zsh
+    echo -n "¿Qué deseas hacer? (1-4, o 'q' para salir): "
+    read choice
+fi
 
 case "$choice" in
     1)
@@ -53,7 +67,12 @@ case "$choice" in
         echo
         ./plugin-manager.sh --profiles
         echo
-        read -p "Ingresa el nombre del perfil: " profile
+        if [ -n "$BASH_VERSION" ]; then
+            read -p "Ingresa el nombre del perfil: " profile
+        else
+            echo -n "Ingresa el nombre del perfil: "
+            read profile
+        fi
         ./plugin-manager.sh --profile "$profile"
         ;;
     3)

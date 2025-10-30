@@ -1,0 +1,176 @@
+# Prerequisitos para Oh My Zsh Installer
+
+## Requisitos del sistema
+
+### Sistemas operativos compatibles:
+- Linux (Ubuntu, Debian, CentOS, RHEL, Arch, etc.)
+- macOS
+- WSL (Windows Subsystem for Linux)
+
+### Software requerido:
+
+#### 1. ZSH
+**Descripción:** Shell requerido para Oh My Zsh
+**Instalación:**
+```bash
+# Ubuntu/Debian
+sudo apt-get update && sudo apt-get install zsh
+
+# CentOS/RHEL/Fedora
+sudo yum install zsh
+# o para versiones más nuevas:
+sudo dnf install zsh
+
+# Arch Linux
+sudo pacman -S zsh
+
+# macOS (si no está instalado)
+brew install zsh
+
+# Verificar instalación
+zsh --version
+```
+
+#### 2. Git
+**Descripción:** Necesario para clonar repositorios de plugins
+**Instalación:**
+```bash
+# Ubuntu/Debian
+sudo apt-get install git
+
+# CentOS/RHEL/Fedora
+sudo yum install git
+# o:
+sudo dnf install git
+
+# Arch Linux
+sudo pacman -S git
+
+# macOS
+brew install git
+
+# Verificar instalación
+git --version
+```
+
+#### 3. curl
+**Descripción:** Usado para descargar Oh My Zsh
+**Instalación:**
+```bash
+# Ubuntu/Debian
+sudo apt-get install curl
+
+# CentOS/RHEL/Fedora
+sudo yum install curl
+# o:
+sudo dnf install curl
+
+# Arch Linux
+sudo pacman -S curl
+
+# macOS (generalmente ya incluido)
+brew install curl
+
+# Verificar instalación
+curl --version
+```
+
+## Verificación rápida de prerequisitos
+
+Ejecuta este comando para verificar que todos los prerequisitos están instalados:
+
+```bash
+echo "=== Verificación de prerequisitos ==="
+echo -n "ZSH: "; zsh --version 2>/dev/null && echo "✓ Instalado" || echo "✗ No instalado"
+echo -n "Git: "; git --version 2>/dev/null && echo "✓ Instalado" || echo "✗ No instalado"  
+echo -n "curl: "; curl --version 2>/dev/null | head -1 && echo "✓ Instalado" || echo "✗ No instalado"
+echo "=================================="
+```
+
+## Instalación automática de prerequisitos
+
+### Para Ubuntu/Debian:
+```bash
+sudo apt-get update
+sudo apt-get install -y zsh git curl
+```
+
+### Para CentOS/RHEL/Fedora:
+```bash
+# CentOS/RHEL
+sudo yum install -y zsh git curl
+
+# Fedora
+sudo dnf install -y zsh git curl
+```
+
+### Para Arch Linux:
+```bash
+sudo pacman -S zsh git curl
+```
+
+### Para macOS:
+```bash
+# Instalar Homebrew si no está instalado
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Instalar prerequisitos
+brew install zsh git curl
+```
+
+## Configuración adicional recomendada
+
+### Cambiar shell por defecto a zsh (opcional pero recomendado):
+```bash
+# Verificar que zsh está en la lista de shells válidos
+cat /etc/shells
+
+# Cambiar shell por defecto
+chsh -s $(which zsh)
+
+# Cerrar sesión y volver a iniciar para que tome efecto
+```
+
+### Permisos necesarios:
+- Escritura en el directorio home (`$HOME`)
+- Capacidad de crear directorios en `~/.oh-my-zsh/`
+- Capacidad de modificar `~/.zshrc`
+
+## Troubleshooting
+
+### Error: "zsh: command not found"
+- Instalar zsh según las instrucciones arriba
+
+### Error: "git: command not found"  
+- Instalar git según las instrucciones arriba
+
+### Error: "curl: command not found"
+- Instalar curl según las instrucciones arriba
+
+### Error de permisos
+- Verificar que tienes permisos de escritura en tu directorio home
+- Ejecutar: `ls -la ~ | grep "^d.*$USER"`
+
+### Oh My Zsh ya instalado
+- El script detecta instalaciones existentes y puede actualizarlas
+- Para reinstalar completamente: `rm -rf ~/.oh-my-zsh` (¡cuidado: esto borra la instalación actual!)
+
+## Notas importantes
+
+1. **No usar sudo** para la instalación de Oh My Zsh (se instala en el directorio del usuario)
+2. **Hacer backup** de tu `.zshrc` existente antes de la instalación
+3. **Reiniciar terminal** o ejecutar `source ~/.zshrc` después de la instalación
+4. **Verificar conexión a internet** para descargar plugins externos
+
+## Versiones recomendadas
+
+- **ZSH**: 5.0 o superior
+- **Git**: 2.0 o superior  
+- **curl**: 7.0 o superior
+
+Para verificar versiones:
+```bash
+zsh --version
+git --version
+curl --version
+```
